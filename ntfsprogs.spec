@@ -103,15 +103,18 @@ rm -rf "$RPM_BUILD_ROOT"
 %files -n ntfsmount
 %defattr(-,root,root)
 %{bindir}/ntfsmount*
+/sbin/mount.fuse.ntfs
 /sbin/mount.ntfs-fuse
 %{mandir}/man8/ntfsmount.8*
 %{mandir}/man8/mount.ntfs-fuse.8*
+%{mandir}/man8/mount.fuse.ntfs.8*
 
 %files devel
 %defattr(-,root,root)
 %{_includedir}/*
 %{_libdir}/libntfs.*a*
 %{_libdir}/gnome-vfs-2.0/modules/libntfs-gnomevfs.*a*
+%{mandir}/man8/libntfs.8*
 
 %changelog
 * Mon Sep 10 2007 Yura Pakhuchiy <pakhuchiy@gmail.com>
