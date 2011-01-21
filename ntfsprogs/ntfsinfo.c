@@ -383,6 +383,8 @@ static void ntfs_dump_volume(ntfs_volume *vol)
 	printf("\tCluster Size: %u\n", (unsigned int)vol->cluster_size);
 	printf("\tVolume Size in Clusters: %lld\n",
 			(long long)vol->nr_clusters);
+	printf("\tFree Space in Clusters: %lld\n",
+			(long long)vol->nr_free_clusters);
 
 	printf("MFT Information \n");
 	printf("\tMFT Record Size: %u\n", (unsigned int)vol->mft_record_size);
