@@ -1,6 +1,6 @@
 %define	name	ntfsprogs
 %define	ver	2.0.0
-%define	rel	1
+%define	rel	nats1
 %define	prefix	/usr
 %define bindir	/usr/bin
 %define sbindir /usr/sbin
