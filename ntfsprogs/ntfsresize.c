@@ -134,6 +134,7 @@ static struct {
 	int info;
 	int show_progress;
 	int badsectors;
+	int chkdsk_later;
 	s64 bytes;
 	char *volume;
 } opt;
@@ -316,6 +317,7 @@ static void usage(void)
 		"    -n, --no-action        Do not write to disk\n"
 		"    -b, --bad-sectors      Support disks having bad sectors\n"
 		"    -f, --force            Force to progress\n"
+		"    -l, --chkdsk-later     Do not flag disk as requiring chkdsk at next boot\n"
 		"    -P, --no-progress-bar  Don't show progress bar\n"
 		"    -v, --verbose          More output\n"
 		"    -V, --version          Display version information\n"
@@ -450,6 +452,7 @@ static int parse_options(int argc, char **argv)
 		{ "size",	required_argument,	NULL, 's' },
 		{ "verbose",	no_argument,		NULL, 'v' },
 		{ "version",	no_argument,		NULL, 'V' },
+		{ "chkdsk-later", no_argument,		NULL, 'l' },
 		{ NULL, 0, NULL, 0 }
 	};
 
@@ -503,6 +506,9 @@ static int parse_options(int argc, char **argv)
 			break;
 		case 'V':
 			ver++;
+			break;
+		case 'l':
+			opt.chkdsk_later++;
 			break;
 		default:
 			if (optopt == 's') {
@@ -2290,14 +2296,17 @@ static ntfs_volume *mount_volume(void)
  */
 static void prepare_volume_fixup(ntfs_volume *vol)
 {
-	printf("Schedule chkdsk for NTFS consistency check at Windows boot "
-			"time ...\n");
-	vol->flags |= VOLUME_IS_DIRTY;
-	if (ntfs_volume_write_flags(vol, vol->flags))
-		perr_exit("Failed to set the volume dirty");
-	NVolSetWasDirty(vol);
-	if (vol->dev->d_ops->sync(vol->dev) == -1)
-		perr_exit("Failed to sync device");
+	if (opt.chkdsk_later <= 0) {
+		printf("Schedule chkdsk for NTFS consistency check at Windows boot "
+				"time ...\n");
+		vol->flags |= VOLUME_IS_DIRTY;
+		if (ntfs_volume_write_flags(vol, vol->flags))
+			perr_exit("Failed to set the volume dirty");
+		NVolSetWasDirty(vol);
+		if (vol->dev->d_ops->sync(vol->dev) == -1)
+			perr_exit("Failed to sync device");
+	}
+
 	printf("Resetting $LogFile ... (this might take a while)\n");
 	if (ntfs_logfile_reset(vol))
 		perr_exit("Failed to reset $LogFile");
