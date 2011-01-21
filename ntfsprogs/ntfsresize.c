@@ -317,7 +317,7 @@ static void usage(void)
 		"    -n, --no-action        Do not write to disk\n"
 		"    -b, --bad-sectors      Support disks having bad sectors\n"
 		"    -f, --force            Force to progress\n"
-		"    -l, --chkdsk-later     Do not flag disk as requiring chkdsk at next boot\n"
+		"    -l, --chkdsk-later     Flag disk as requiring chkdsk at next boot\n"
 		"    -P, --no-progress-bar  Don't show progress bar\n"
 		"    -v, --verbose          More output\n"
 		"    -V, --version          Display version information\n"
@@ -2296,7 +2296,7 @@ static ntfs_volume *mount_volume(void)
  */
 static void prepare_volume_fixup(ntfs_volume *vol)
 {
-	if (opt.chkdsk_later <= 0) {
+	if (opt.chkdsk_later > 0) {
 		printf("Schedule chkdsk for NTFS consistency check at Windows boot "
 				"time ...\n");
 		vol->flags |= VOLUME_IS_DIRTY;
