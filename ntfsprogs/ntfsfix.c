@@ -256,13 +256,13 @@ static int set_dirty_flag(ntfs_volume *vol)
 	 */
 	flags = vol->flags | VOLUME_IS_DIRTY;
 	if (OLD_ntfs_volume_set_flags(vol, flags)) {
-		ntfs_log_info(FAILED);
+		ntfs_log_info("%s", FAILED);
 		ntfs_log_error("Error setting volume flags.\n");
 		return -1;
 	}
 	vol->flags = flags;
 	NVolSetWasDirty(vol);
-	ntfs_log_info(OK);
+	ntfs_log_info("%s", OK);
 	return 0;
 }
 
@@ -275,11 +275,11 @@ static int empty_journal(ntfs_volume *vol)
 		return 0;
 	ntfs_log_info("Going to empty the journal ($LogFile)... ");
 	if (ntfs_logfile_reset(vol)) {
-		ntfs_log_info(FAILED);
+		ntfs_log_info("%s", FAILED);
 		ntfs_log_perror("Failed to reset $LogFile");
 		return -1;
 	}
-	ntfs_log_info(OK);
+	ntfs_log_info("%s", OK);
 	return 0;
 }
 
@@ -312,25 +312,25 @@ static int fix_mftmirr(ntfs_volume *vol)
 	l = ntfs_attr_mst_pread(vol->mft_na, 0, vol->mftmirr_size,
 			vol->mft_record_size, m);
 	if (l != vol->mftmirr_size) {
-		ntfs_log_info(FAILED);
+		ntfs_log_info("%s", FAILED);
 		if (l != -1)
 			errno = EIO;
 		ntfs_log_perror("Failed to read $MFT");
 		goto error_exit;
 	}
-	ntfs_log_info(OK);
+	ntfs_log_info("%s", OK);
 
 	ntfs_log_info("Reading $MFTMirr... ");
 	l = ntfs_attr_mst_pread(vol->mftmirr_na, 0, vol->mftmirr_size,
 			vol->mft_record_size, m2);
 	if (l != vol->mftmirr_size) {
-		ntfs_log_info(FAILED);
+		ntfs_log_info("%s", FAILED);
 		if (l != -1)
 			errno = EIO;
 		ntfs_log_perror("Failed to read $MFTMirr");
 		goto error_exit;
 	}
-	ntfs_log_info(OK);
+	ntfs_log_info("%s", OK);
 
 	/*
 	 * FIXME: Need to actually check the $MFTMirr for being real. Otherwise
@@ -365,7 +365,7 @@ static int fix_mftmirr(ntfs_volume *vol)
 		mrec = (MFT_RECORD*)(m + i * vol->mft_record_size);
 		if (mrec->flags & MFT_RECORD_IN_USE) {
 			if (ntfs_is_baad_record(mrec->magic)) {
-				ntfs_log_info(FAILED);
+				ntfs_log_info("%s", FAILED);
 				ntfs_log_error("$MFT error: Incomplete multi "
 						"sector transfer detected in "
 						"%s.\nCannot handle this yet. "
@@ -373,7 +373,7 @@ static int fix_mftmirr(ntfs_volume *vol)
 				goto error_exit;
 			}
 			if (!ntfs_is_mft_record(mrec->magic)) {
-				ntfs_log_info(FAILED);
+				ntfs_log_info("%s", FAILED);
 				ntfs_log_error("$MFT error: Invalid mft "
 						"record for %s.\nCannot "
 						"handle this yet. )-:\n", s);
@@ -383,14 +383,14 @@ static int fix_mftmirr(ntfs_volume *vol)
 		mrec2 = (MFT_RECORD*)(m2 + i * vol->mft_record_size);
 		if (mrec2->flags & MFT_RECORD_IN_USE) {
 			if (ntfs_is_baad_record(mrec2->magic)) {
-				ntfs_log_info(FAILED);
+				ntfs_log_info("%s", FAILED);
 				ntfs_log_error("$MFTMirr error: Incomplete "
 						"multi sector transfer "
 						"detected in %s.\n", s);
 				goto error_exit;
 			}
 			if (!ntfs_is_mft_record(mrec2->magic)) {
-				ntfs_log_info(FAILED);
+				ntfs_log_info("%s", FAILED);
 				ntfs_log_error("$MFTMirr error: Invalid mft "
 						"record for %s.\n", s);
 				goto error_exit;
@@ -403,7 +403,7 @@ static int fix_mftmirr(ntfs_volume *vol)
 		if (memcmp(mrec, mrec2, ntfs_mft_record_get_data_size(mrec))) {
 			if (!done) {
 				done = TRUE;
-				ntfs_log_info(FAILED);
+				ntfs_log_info("%s", FAILED);
 			}
 			ntfs_log_info("Correcting differences in $MFT%s "
 					"record %d...", use_mirr ? "" : "Mirr",
@@ -411,16 +411,16 @@ static int fix_mftmirr(ntfs_volume *vol)
 			br = ntfs_mft_record_write(vol, i,
 					use_mirr ? mrec2 : mrec);
 			if (br) {
-				ntfs_log_info(FAILED);
+				ntfs_log_info("%s", FAILED);
 				ntfs_log_perror("Error correcting $MFT%s",
 						use_mirr ? "" : "Mirr");
 				goto error_exit;
 			}
-			ntfs_log_info(OK);
+			ntfs_log_info("%s", OK);
 		}
 	}
 	if (!done)
-		ntfs_log_info(OK);
+		ntfs_log_info("%s", OK);
 	ntfs_log_info("Processing of $MFT and $MFTMirr completed "
 			"successfully.\n");
 	ret = 0;
@@ -444,13 +444,13 @@ static int fix_mount(void)
 	dev = ntfs_device_alloc(opt.volume, 0, &ntfs_device_default_io_ops,
 			NULL);
 	if (!dev) {
-		ntfs_log_info(FAILED);
+		ntfs_log_info("%s", FAILED);
 		ntfs_log_perror("Failed to allocate device");
 		return -1;
 	}
 	vol = ntfs_volume_startup(dev, 0);
 	if (!vol) {
-		ntfs_log_info(FAILED);
+		ntfs_log_info("%s", FAILED);
 		ntfs_log_perror("Failed to startup volume");
 		ntfs_log_error("Volume is corrupt. You should run chkdsk.\n");
 		ntfs_device_free(dev);
@@ -498,11 +498,11 @@ int main(int argc, char **argv)
 	ntfs_log_info("Mounting volume... ");
 	vol = ntfs_mount(opt.volume, 0);
 	if (vol) {
-		ntfs_log_info(OK);
+		ntfs_log_info("%s", OK);
 		ntfs_log_info("Processing of $MFT and $MFTMirr completed "
 				"successfully.\n");
 	} else {
-		ntfs_log_info(FAILED);
+		ntfs_log_info("%s", FAILED);
 		if (fix_mount() < 0)
 			exit(1);
 		vol = ntfs_mount(opt.volume, 0);
